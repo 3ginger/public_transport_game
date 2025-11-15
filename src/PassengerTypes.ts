@@ -1,0 +1,175 @@
+import { PassengerType, PassengerTemplate } from './types';
+
+// Detailed passenger type definitions with social mechanics
+export const PASSENGER_TEMPLATES: Record<PassengerType, PassengerTemplate> = {
+  [PassengerType.OFFICE_WORKER]: {
+    type: PassengerType.OFFICE_WORKER,
+    name: 'Office Worker',
+    color: '#4a90e2',
+    mood: 50,
+    stress: 40,
+    socialEnergy: -2,
+    noiseLevel: 0,
+    smellLevel: 0,
+    bubbleSize: 50,
+    triggers: [
+      { type: PassengerType.PUNK, stressModifier: 8 },
+      { type: PassengerType.HOMELESS, stressModifier: 10 },
+      { type: PassengerType.MOM_WITH_CHILD, stressModifier: 5 },
+      { type: PassengerType.CHILL_PERSON, stressModifier: -5 },
+    ],
+    description: 'Dislikes noise and smell. Passive negativity.',
+  },
+
+  [PassengerType.PUNK]: {
+    type: PassengerType.PUNK,
+    name: 'Punk',
+    color: '#e74c3c',
+    mood: 70,
+    stress: 20,
+    socialEnergy: 3,
+    noiseLevel: 3,
+    smellLevel: 1,
+    bubbleSize: 30,
+    triggers: [
+      { type: PassengerType.OFFICE_WORKER, stressModifier: 3 },
+      { type: PassengerType.HIPSTER, stressModifier: -5 },
+      { type: PassengerType.CHILL_PERSON, stressModifier: -3 },
+    ],
+    description: 'Loud but positive energy. Scares introverts.',
+  },
+
+  [PassengerType.MOM_WITH_CHILD]: {
+    type: PassengerType.MOM_WITH_CHILD,
+    name: 'Mom with Child',
+    color: '#f39c12',
+    mood: 40,
+    stress: 60,
+    socialEnergy: 0,
+    noiseLevel: 2,
+    smellLevel: 0,
+    bubbleSize: 60,
+    triggers: [
+      { type: PassengerType.CHILL_PERSON, stressModifier: -8 },
+      { type: PassengerType.TALKATIVE_OLD_MAN, stressModifier: -5 },
+      { type: PassengerType.PUNK, stressModifier: 6 },
+    ],
+    description: 'Noisy but calms down near chill people.',
+  },
+
+  [PassengerType.HOMELESS]: {
+    type: PassengerType.HOMELESS,
+    name: 'Homeless',
+    color: '#95a5a6',
+    mood: 30,
+    stress: 10,
+    socialEnergy: -1,
+    noiseLevel: 1,
+    smellLevel: 3,
+    bubbleSize: 40,
+    triggers: [
+      { type: PassengerType.PUNK, stressModifier: -3 },
+      { type: PassengerType.CHILL_PERSON, stressModifier: -5 },
+    ],
+    description: 'Strong smell. Unbothered by chaos.',
+  },
+
+  [PassengerType.COUPLE_LEFT]: {
+    type: PassengerType.COUPLE_LEFT,
+    name: 'Lover (L)',
+    color: '#e91e63',
+    mood: 80,
+    stress: 10,
+    socialEnergy: 2,
+    noiseLevel: 1,
+    smellLevel: 0,
+    bubbleSize: 35,
+    triggers: [
+      { type: PassengerType.COUPLE_RIGHT, stressModifier: -20 }, // Must be together!
+    ],
+    description: 'Must be near their partner or stress skyrockets.',
+  },
+
+  [PassengerType.COUPLE_RIGHT]: {
+    type: PassengerType.COUPLE_RIGHT,
+    name: 'Lover (R)',
+    color: '#e91e63',
+    mood: 80,
+    stress: 10,
+    socialEnergy: 2,
+    noiseLevel: 1,
+    smellLevel: 0,
+    bubbleSize: 35,
+    triggers: [
+      { type: PassengerType.COUPLE_LEFT, stressModifier: -20 }, // Must be together!
+    ],
+    description: 'Must be near their partner or stress skyrockets.',
+  },
+
+  [PassengerType.INTROVERT]: {
+    type: PassengerType.INTROVERT,
+    name: 'Introvert',
+    color: '#9b59b6',
+    mood: 50,
+    stress: 50,
+    socialEnergy: -3,
+    noiseLevel: 0,
+    smellLevel: 0,
+    bubbleSize: 80, // Large personal space!
+    triggers: [
+      { type: PassengerType.PUNK, stressModifier: 15 },
+      { type: PassengerType.TALKATIVE_OLD_MAN, stressModifier: 12 },
+      { type: PassengerType.MOM_WITH_CHILD, stressModifier: 10 },
+    ],
+    description: 'Needs space. Hates crowds and noise.',
+  },
+
+  [PassengerType.TALKATIVE_OLD_MAN]: {
+    type: PassengerType.TALKATIVE_OLD_MAN,
+    name: 'Talkative Elder',
+    color: '#d68910',
+    mood: 60,
+    stress: 30,
+    socialEnergy: 1,
+    noiseLevel: 2,
+    smellLevel: 0,
+    bubbleSize: 45,
+    triggers: [
+      { type: PassengerType.MOM_WITH_CHILD, stressModifier: -5 },
+      { type: PassengerType.CHILL_PERSON, stressModifier: -3 },
+    ],
+    description: 'Periodically loud. Calms moms and elders.',
+  },
+
+  [PassengerType.HIPSTER]: {
+    type: PassengerType.HIPSTER,
+    name: 'Hipster',
+    color: '#16a085',
+    mood: 65,
+    stress: 35,
+    socialEnergy: 1,
+    noiseLevel: 1,
+    smellLevel: 0,
+    bubbleSize: 40,
+    triggers: [
+      { type: PassengerType.OFFICE_WORKER, stressModifier: 7 },
+      { type: PassengerType.PUNK, stressModifier: -4 },
+      { type: PassengerType.CHILL_PERSON, stressModifier: -3 },
+    ],
+    description: 'Dislikes office culture. Likes alternative people.',
+  },
+
+  [PassengerType.CHILL_PERSON]: {
+    type: PassengerType.CHILL_PERSON,
+    name: 'Chill Person',
+    color: '#27ae60',
+    mood: 80,
+    stress: 10,
+    socialEnergy: 4, // Strong positive influence!
+    noiseLevel: 0,
+    smellLevel: 0,
+    bubbleSize: 35,
+    triggers: [],
+    description: 'Universal stabilizer. Calms everyone nearby.',
+  },
+};
