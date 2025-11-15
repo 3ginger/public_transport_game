@@ -1,8 +1,8 @@
-import { PassengerType } from './types';
-import { PASSENGER_TEMPLATES } from './PassengerTypes';
-import { TrainCoach } from './TrainCoach';
-import { SocialSimulation } from './SocialSimulation';
-import { Renderer } from './Renderer';
+import { PassengerType } from './types.js';
+import { PASSENGER_TEMPLATES } from './PassengerTypes.js';
+import { TrainCoach } from './TrainCoach.js';
+import { SocialSimulation } from './SocialSimulation.js';
+import { Renderer } from './Renderer.js';
 export class Game {
     constructor(canvas) {
         this.lastTime = 0;
@@ -107,8 +107,8 @@ export class Game {
             return;
         const maxWidth = Math.min(1200, window.innerWidth);
         const maxHeight = Math.min(600, window.innerHeight);
-        this.canvas.style.width = maxWidth + 'px';
-        this.canvas.style.height = maxHeight + 'px';
+        this.canvas.style.width = maxWidth + 'px.js';
+        this.canvas.style.height = maxHeight + 'px.js';
     }
     handleClick(e) {
         if (this.state.gameOver)
@@ -334,7 +334,7 @@ export class Game {
                 ? Math.floor(this.state.totalStress / this.state.passengers.length)
                 : 0;
             stressEl.textContent = `${avgStress}%`;
-            stressEl.style.color = avgStress > 70 ? '#f00' : avgStress > 50 ? '#ff0' : '#0f0';
+            stressEl.style.color = avgStress > 70 ? '#f00' : avgStress > 50 ? '#ff0' : '#0f0.js';
         }
         if (queueEl)
             queueEl.textContent = String(this.state.queue.length);
@@ -349,13 +349,13 @@ export class Game {
         if (!profileEl || !typeEl || !traitsEl || !portraitEl)
             return;
         const template = PASSENGER_TEMPLATES[passenger.type];
-        profileEl.style.display = 'block';
+        profileEl.style.display = 'block.js';
         typeEl.textContent = template.name;
         // Use renderer to draw passenger portrait
         this.renderer.drawPassengerPortrait(passenger, portraitEl);
         // Show traits with current status
-        const moodStatus = passenger.mood > 60 ? '😊' : passenger.mood > 30 ? '😐' : '😟';
-        const stressStatus = passenger.stress > 70 ? '🔴' : passenger.stress > 40 ? '🟡' : '🟢';
+        const moodStatus = passenger.mood > 60 ? '😊' : passenger.mood > 30 ? '😐' : '😟.js';
+        const stressStatus = passenger.stress > 70 ? '🔴' : passenger.stress > 40 ? '🟡' : '🟢.js';
         traitsEl.innerHTML = `
       <div class="trait">Mood: ${Math.floor(passenger.mood)} ${moodStatus}</div>
       <div class="trait">Stress: ${Math.floor(passenger.stress)} ${stressStatus}</div>
@@ -371,7 +371,7 @@ export class Game {
     hidePassengerProfile() {
         const profileEl = document.getElementById('passengerProfile');
         if (profileEl)
-            profileEl.style.display = 'none';
+            profileEl.style.display = 'none.js';
         this.state.viewingPassenger = null;
     }
     render() {
