@@ -1,4 +1,4 @@
-import { PASSENGER_TEMPLATES } from './PassengerTypes.js';
+import { PASSENGER_TEMPLATES } from './PassengerTypes';
 export class Renderer {
     constructor(canvas) {
         this.canvas = canvas;
@@ -25,20 +25,20 @@ export class Renderer {
         }
     }
     clear() {
-        this.ctx.fillStyle = '#2a2a2a.js';
+        this.ctx.fillStyle = '#2a2a2a';
         this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
     }
     drawCoach(coach) {
         // Draw floor
-        this.ctx.fillStyle = '#3a3a3a.js';
+        this.ctx.fillStyle = '#3a3a3a';
         this.ctx.fillRect(0, 0, coach.width, coach.height);
         // Draw corridor
         const corridorY = coach.height / 2;
         const corridorHeight = 150;
-        this.ctx.fillStyle = '#4a4a4a.js';
+        this.ctx.fillStyle = '#4a4a4a';
         this.ctx.fillRect(0, corridorY - corridorHeight / 2, coach.width, corridorHeight);
         // Draw grid lines
-        this.ctx.strokeStyle = '#555.js';
+        this.ctx.strokeStyle = '#555';
         this.ctx.lineWidth = 1;
         for (let x = 0; x < coach.width; x += 50) {
             this.ctx.beginPath();
@@ -49,8 +49,8 @@ export class Renderer {
     }
     drawSeats(seats) {
         for (const seat of seats) {
-            this.ctx.fillStyle = seat.occupied ? '#666' : '#8a8a8a.js';
-            this.ctx.strokeStyle = '#aaa.js';
+            this.ctx.fillStyle = seat.occupied ? '#666' : '#8a8a8a';
+            this.ctx.strokeStyle = '#aaa';
             this.ctx.lineWidth = 2;
             const seatSize = 35;
             this.ctx.fillRect(seat.position.x - seatSize / 2, seat.position.y - seatSize / 2, seatSize, seatSize);
@@ -73,7 +73,7 @@ export class Renderer {
         // Highlight if viewing this passenger
         const isViewing = viewingPassenger?.id === passenger.id;
         if (isViewing) {
-            this.ctx.fillStyle = 'rgba(255, 255, 100, 0.3).js';
+            this.ctx.fillStyle = 'rgba(255, 255, 100, 0.3)';
             this.ctx.fillRect(passenger.position.x + offsetX - size, passenger.position.y - size, size * 2, size * 2);
         }
         // Draw body (square head + shoulders)
@@ -91,15 +91,15 @@ export class Renderer {
         // Mood indicator (small bar)
         const barWidth = 30;
         const barHeight = 4;
-        this.ctx.fillStyle = '#333.js';
+        this.ctx.fillStyle = '#333';
         this.ctx.fillRect(passenger.position.x + offsetX - barWidth / 2, passenger.position.y - size / 2 - 10, barWidth, barHeight);
-        const moodColor = passenger.mood > 60 ? '#0f0' : passenger.mood > 30 ? '#ff0' : '#f00.js';
+        const moodColor = passenger.mood > 60 ? '#0f0' : passenger.mood > 30 ? '#ff0' : '#f00';
         this.ctx.fillStyle = moodColor;
         this.ctx.fillRect(passenger.position.x + offsetX - barWidth / 2, passenger.position.y - size / 2 - 10, (barWidth * passenger.mood) / 100, barHeight);
         // Type label
-        this.ctx.fillStyle = '#fff.js';
-        this.ctx.font = '10px monospace.js';
-        this.ctx.textAlign = 'center.js';
+        this.ctx.fillStyle = '#fff';
+        this.ctx.font = '10px monospace';
+        this.ctx.textAlign = 'center';
         this.ctx.fillText(template.name.substring(0, 3), passenger.position.x + offsetX, passenger.position.y + size);
         this.ctx.restore();
     }
@@ -107,11 +107,11 @@ export class Renderer {
         const queueX = 20;
         const queueY = 100;
         const spacing = 50;
-        this.ctx.fillStyle = 'rgba(0, 0, 0, 0.7).js';
+        this.ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
         this.ctx.fillRect(queueX - 10, queueY - 10, 70, queue.length * spacing + 20);
-        this.ctx.fillStyle = '#fff.js';
-        this.ctx.font = '14px monospace.js';
-        this.ctx.textAlign = 'left.js';
+        this.ctx.fillStyle = '#fff';
+        this.ctx.font = '14px monospace';
+        this.ctx.textAlign = 'left';
         this.ctx.fillText('Queue:', queueX, queueY - 20);
         for (let i = 0; i < queue.length; i++) {
             const passenger = queue[i];
@@ -120,14 +120,14 @@ export class Renderer {
             const isSelected = selected?.id === passenger.id;
             // Highlight selected
             if (isSelected) {
-                this.ctx.fillStyle = 'rgba(255, 255, 0, 0.3).js';
+                this.ctx.fillStyle = 'rgba(255, 255, 0, 0.3)';
                 this.ctx.fillRect(queueX - 5, y - 20, 60, 40);
             }
             // Draw mini passenger
             this.ctx.fillStyle = template.color;
             this.ctx.fillRect(queueX, y, 25, 25);
             // Draw border
-            this.ctx.strokeStyle = isSelected ? '#ff0' : '#aaa.js';
+            this.ctx.strokeStyle = isSelected ? '#ff0' : '#aaa';
             this.ctx.lineWidth = isSelected ? 3 : 1;
             this.ctx.strokeRect(queueX, y, 25, 25);
         }
@@ -141,11 +141,11 @@ export class Renderer {
         if (distance < 30) {
             const template = PASSENGER_TEMPLATES[passenger.type];
             // Draw tooltip
-            this.ctx.fillStyle = 'rgba(0, 0, 0, 0.9).js';
+            this.ctx.fillStyle = 'rgba(0, 0, 0, 0.9)';
             this.ctx.fillRect(mousePos.x + 20, mousePos.y - 40, 200, 80);
-            this.ctx.fillStyle = '#fff.js';
-            this.ctx.font = '12px monospace.js';
-            this.ctx.textAlign = 'left.js';
+            this.ctx.fillStyle = '#fff';
+            this.ctx.font = '12px monospace';
+            this.ctx.textAlign = 'left';
             this.ctx.fillText(template.name, mousePos.x + 25, mousePos.y - 25);
             this.ctx.fillText(`Mood: ${Math.floor(passenger.mood)}`, mousePos.x + 25, mousePos.y - 10);
             this.ctx.fillText(`Stress: ${Math.floor(passenger.stress)}`, mousePos.x + 25, mousePos.y + 5);
@@ -158,7 +158,7 @@ export class Renderer {
     drawPassengerPortrait(passenger, canvasElement) {
         const template = PASSENGER_TEMPLATES[passenger.type];
         // Create a mini canvas for the portrait
-        canvasElement.innerHTML = '.js';
+        canvasElement.innerHTML = '';
         const portraitCanvas = document.createElement('canvas');
         portraitCanvas.width = 80;
         portraitCanvas.height = 80;
@@ -170,7 +170,7 @@ export class Renderer {
         const centerX = 40;
         const centerY = 35;
         // Background
-        ctx.fillStyle = '#333.js';
+        ctx.fillStyle = '#333';
         ctx.fillRect(0, 0, 80, 80);
         // Head
         ctx.fillStyle = template.color;
@@ -178,7 +178,7 @@ export class Renderer {
         // Shoulders
         ctx.fillRect(centerX - size / 1.5, centerY + size / 3, size * 1.3, size / 2);
         // Border
-        ctx.strokeStyle = '#666.js';
+        ctx.strokeStyle = '#666';
         ctx.lineWidth = 2;
         ctx.strokeRect(0, 0, 80, 80);
         canvasElement.appendChild(portraitCanvas);

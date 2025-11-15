@@ -1,5 +1,5 @@
-import { PassengerType } from './types.js';
-import { PASSENGER_TEMPLATES } from './PassengerTypes.js';
+import { PassengerType } from './types';
+import { PASSENGER_TEMPLATES } from './PassengerTypes';
 export class SocialSimulation {
     constructor() {
         this.interactionRadius = 100;
