@@ -1,4 +1,4 @@
-import { PassengerType } from './types';
+import { PassengerType } from './types.js';
 // Detailed passenger type definitions with social mechanics
 export const PASSENGER_TEMPLATES = {
     [PassengerType.OFFICE_WORKER]: {
