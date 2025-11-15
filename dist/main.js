@@ -1,15 +1,21 @@
 import { Game } from './Game.js';
+console.log('Script loaded!');
 window.addEventListener('DOMContentLoaded', () => {
+    console.log('DOM loaded!');
     const canvas = document.getElementById('gameCanvas');
+    console.log('Canvas element:', canvas);
     if (!canvas) {
         console.error('Canvas element not found!');
         return;
     }
-    const game = new Game(canvas);
-    game.start();
-    console.log('Train Social Tetris started!');
-    console.log('Controls:');
-    console.log('- Click on queue to select passenger');
-    console.log('- Click on seat or corridor to place passenger');
-    console.log('- Arrow keys or mouse wheel to scroll');
+    console.log('Creating game...');
+    try {
+        const game = new Game(canvas);
+        console.log('Game created, starting...');
+        game.start();
+        console.log('Train Social Tetris started!');
+    }
+    catch (error) {
+        console.error('Error starting game:', error);
+    }
 });
