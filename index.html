@@ -42,6 +42,21 @@
             touch-action: pan-x;
         }
 
+        #errorLog {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: rgba(255, 0, 0, 0.9);
+            color: #fff;
+            padding: 10px;
+            font-size: 12px;
+            max-height: 200px;
+            overflow-y: auto;
+            display: none;
+            z-index: 9999;
+        }
+
         #ui {
             position: absolute;
             top: 10px;
@@ -209,6 +224,46 @@
         </div>
     </div>
 
-    <script type="module" src="dist/main.js"></script>
+    <div id="errorLog"></div>
+
+    <script>
+        // Error logging for mobile debugging
+        const errorLog = document.getElementById('errorLog');
+        function logError(msg) {
+            console.error(msg);
+            errorLog.style.display = 'block';
+            errorLog.innerHTML += msg + '<br>';
+        }
+
+        window.onerror = function(msg, url, line, col, error) {
+            logError('Error: ' + msg + ' at ' + line + ':' + col);
+            return false;
+        };
+
+        window.addEventListener('unhandledrejection', function(event) {
+            logError('Promise error: ' + event.reason);
+        });
+
+        logError('Loading game...');
+    </script>
+
+    <script type="module">
+        try {
+            const errorLog = document.getElementById('errorLog');
+            errorLog.innerHTML += 'Module loading started...<br>';
+
+            import('./dist/main.js').then(() => {
+                errorLog.innerHTML += 'Module loaded successfully!<br>';
+                setTimeout(() => {
+                    errorLog.style.display = 'none';
+                }, 2000);
+            }).catch(err => {
+                errorLog.innerHTML += 'Module load error: ' + err.message + '<br>';
+                errorLog.innerHTML += 'Stack: ' + err.stack + '<br>';
+            });
+        } catch (e) {
+            document.getElementById('errorLog').innerHTML += 'Script error: ' + e.message + '<br>';
+        }
+    </script>
 </body>
 </html>
