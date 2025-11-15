@@ -30,9 +30,11 @@ You're the conductor of a train, and at each station, new passengers board. Your
 ### Journey Phase (Simulation)
 - Social dynamics activate automatically
 - Passengers affect each other based on proximity
-- Stress and mood change over time
+- Stress and mood change over time in real-time
+- Click on any passenger to view their live stats
+- Watch passengers exit with smooth animations
 - If too many passengers reach critical stress → Game Over
-- After ~30 seconds, next station arrives
+- After ~30 seconds, next station arrives with some passengers exiting
 
 ### Win Condition
 Survive as many stations as possible!
@@ -43,10 +45,19 @@ Survive as many stations as possible!
 
 ## Controls
 
-- **Click on queue** - Select passenger to place
-- **Click on coach** - Place selected passenger (seat or standing area)
+### Desktop
+- **Click on queue** - Select passenger to place (during placement phase)
+- **Click on passenger in coach** - View their detailed profile and current stats
+- **Click on seat/corridor** - Place selected passenger (seat or standing area)
 - **Arrow keys / Mouse wheel** - Scroll left/right through the coach
-- **Hover over passenger** - See their current status
+- **Hover over passenger** - Quick status preview
+
+### Mobile/Touch
+- **Tap on queue** - Select passenger to place
+- **Tap on passenger** - View their profile with live stats
+- **Tap on location** - Place selected passenger
+- **Swipe left/right** - Scroll through the coach
+- **Close button (×)** - Close passenger profile panel
 
 ## Game Mechanics
 
@@ -92,8 +103,10 @@ npm run serve
 ## Technical Stack
 
 - TypeScript
-- HTML5 Canvas
+- HTML5 Canvas with touch support
+- Responsive design for mobile devices
 - No external game libraries (pure canvas rendering)
+- Progressive Web App ready
 
 ## Game Structure
 
@@ -108,13 +121,25 @@ src/
 └── main.ts               # Entry point
 ```
 
-## Future Improvements
+## Features
 
+### Current
+- ✅ 10 unique passenger types with distinct behaviors
+- ✅ Real-time social simulation with stress/mood mechanics
+- ✅ Touch controls for mobile devices
+- ✅ Click passengers to view live stats and profiles
+- ✅ Smooth exit animations when passengers leave
+- ✅ Responsive canvas that adapts to screen size
+- ✅ Progressive difficulty through stations
+- ✅ Interactive passenger portraits
+
+### Future Improvements
 - More passenger types (student groups, tourists, business travelers)
 - Boss encounters (wedding party, school trip, football fans)
 - Special events during journey
 - Power-ups and abilities
-- Better visual effects and animations
+- Enhanced visual effects and particle systems
 - Sound effects and music
 - Difficulty progression system
-- High score tracking
+- High score tracking and leaderboards
+- Save/load game state

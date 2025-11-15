@@ -22,7 +22,7 @@ export class Renderer {
 
     this.drawCoach(coach);
     this.drawSeats(coach.seats);
-    this.drawPassengers(state.passengers);
+    this.drawPassengers(state.passengers, state.viewingPassenger);
 
     if (state.isPlacementPhase && state.currentSelectedPassenger) {
       this.drawPlacementPreview(state.currentSelectedPassenger);
@@ -85,22 +85,41 @@ export class Renderer {
     }
   }
 
-  private drawPassengers(passengers: PassengerState[]): void {
+  private drawPassengers(passengers: PassengerState[], viewingPassenger: PassengerState | null): void {
     for (const passenger of passengers) {
-      this.drawPassenger(passenger);
+      this.drawPassenger(passenger, viewingPassenger);
     }
   }
 
-  private drawPassenger(passenger: PassengerState): void {
+  private drawPassenger(passenger: PassengerState, viewingPassenger: PassengerState | null): void {
     const template = PASSENGER_TEMPLATES[passenger.type];
     const size = 30;
+
+    // Exit animation - fade out and move left
+    const opacity = passenger.isExiting ? 1 - passenger.exitProgress : 1;
+    const offsetX = passenger.isExiting ? -passenger.exitProgress * 200 : 0;
+
+    this.ctx.save();
+    this.ctx.globalAlpha = opacity;
+
+    // Highlight if viewing this passenger
+    const isViewing = viewingPassenger?.id === passenger.id;
+    if (isViewing) {
+      this.ctx.fillStyle = 'rgba(255, 255, 100, 0.3)';
+      this.ctx.fillRect(
+        passenger.position.x + offsetX - size,
+        passenger.position.y - size,
+        size * 2,
+        size * 2
+      );
+    }
 
     // Draw body (square head + shoulders)
     this.ctx.fillStyle = template.color;
 
     // Head
     this.ctx.fillRect(
-      passenger.position.x - size / 2,
+      passenger.position.x + offsetX - size / 2,
       passenger.position.y - size / 2,
       size,
       size
@@ -108,7 +127,7 @@ export class Renderer {
 
     // Shoulders
     this.ctx.fillRect(
-      passenger.position.x - size / 1.5,
+      passenger.position.x + offsetX - size / 1.5,
       passenger.position.y + size / 3,
       size * 1.3,
       size / 2
@@ -119,7 +138,7 @@ export class Renderer {
       this.ctx.strokeStyle = `rgba(255, 0, 0, ${passenger.stress / 100})`;
       this.ctx.lineWidth = 3;
       this.ctx.strokeRect(
-        passenger.position.x - size / 2 - 2,
+        passenger.position.x + offsetX - size / 2 - 2,
         passenger.position.y - size / 2 - 2,
         size + 4,
         size + 4
@@ -131,7 +150,7 @@ export class Renderer {
     const barHeight = 4;
     this.ctx.fillStyle = '#333';
     this.ctx.fillRect(
-      passenger.position.x - barWidth / 2,
+      passenger.position.x + offsetX - barWidth / 2,
       passenger.position.y - size / 2 - 10,
       barWidth,
       barHeight
@@ -140,7 +159,7 @@ export class Renderer {
     const moodColor = passenger.mood > 60 ? '#0f0' : passenger.mood > 30 ? '#ff0' : '#f00';
     this.ctx.fillStyle = moodColor;
     this.ctx.fillRect(
-      passenger.position.x - barWidth / 2,
+      passenger.position.x + offsetX - barWidth / 2,
       passenger.position.y - size / 2 - 10,
       (barWidth * passenger.mood) / 100,
       barHeight
@@ -152,9 +171,11 @@ export class Renderer {
     this.ctx.textAlign = 'center';
     this.ctx.fillText(
       template.name.substring(0, 3),
-      passenger.position.x,
+      passenger.position.x + offsetX,
       passenger.position.y + size
     );
+
+    this.ctx.restore();
   }
 
   private drawQueue(queue: PassengerState[], selected: PassengerState | null): void {
@@ -223,5 +244,46 @@ export class Renderer {
     }
 
     return false;
+  }
+
+  // Draw passenger portrait in HTML element
+  drawPassengerPortrait(passenger: PassengerState, canvasElement: HTMLDivElement): void {
+    const template = PASSENGER_TEMPLATES[passenger.type];
+
+    // Create a mini canvas for the portrait
+    canvasElement.innerHTML = '';
+    const portraitCanvas = document.createElement('canvas');
+    portraitCanvas.width = 80;
+    portraitCanvas.height = 80;
+    const ctx = portraitCanvas.getContext('2d');
+    if (!ctx) return;
+
+    // Draw larger version of passenger
+    const size = 50;
+    const centerX = 40;
+    const centerY = 35;
+
+    // Background
+    ctx.fillStyle = '#333';
+    ctx.fillRect(0, 0, 80, 80);
+
+    // Head
+    ctx.fillStyle = template.color;
+    ctx.fillRect(centerX - size / 2, centerY - size / 2, size, size);
+
+    // Shoulders
+    ctx.fillRect(
+      centerX - size / 1.5,
+      centerY + size / 3,
+      size * 1.3,
+      size / 2
+    );
+
+    // Border
+    ctx.strokeStyle = '#666';
+    ctx.lineWidth = 2;
+    ctx.strokeRect(0, 0, 80, 80);
+
+    canvasElement.appendChild(portraitCanvas);
   }
 }

@@ -47,6 +47,7 @@ export class Game {
       isPlacementPhase: true,
       roundTimer: this.config.placementTimePerStation,
       currentSelectedPassenger: null,
+      viewingPassenger: null,
       gameOver: false,
       scrollOffset: 0,
     };
@@ -56,8 +57,20 @@ export class Game {
   }
 
   private setupEventListeners(): void {
+    // Mouse events
     this.canvas.addEventListener('click', (e) => this.handleClick(e));
     this.canvas.addEventListener('mousemove', (e) => this.handleMouseMove(e));
+
+    // Touch events for mobile
+    this.canvas.addEventListener('touchstart', (e) => this.handleTouchStart(e), { passive: false });
+    this.canvas.addEventListener('touchmove', (e) => this.handleTouchMove(e), { passive: false });
+    this.canvas.addEventListener('touchend', (e) => this.handleTouchEnd(e), { passive: false });
+
+    // Profile close button
+    const closeBtn = document.getElementById('closeProfile');
+    if (closeBtn) {
+      closeBtn.addEventListener('click', () => this.hidePassengerProfile());
+    }
 
     // Keyboard for scrolling
     window.addEventListener('keydown', (e) => {
@@ -77,28 +90,102 @@ export class Game {
         this.state.scrollOffset + e.deltaY * 0.5
       ));
     });
+
+    // Resize handler for mobile
+    this.handleResize();
+    window.addEventListener('resize', () => this.handleResize());
+  }
+
+  private touchStartX = 0;
+  private touchStartScrollOffset = 0;
+  private lastTouchPos: Position | null = null;
+
+  private handleTouchStart(e: TouchEvent): void {
+    e.preventDefault();
+    const touch = e.touches[0];
+    this.touchStartX = touch.clientX;
+    this.touchStartScrollOffset = this.state.scrollOffset;
+
+    const rect = this.canvas.getBoundingClientRect();
+    this.lastTouchPos = {
+      x: touch.clientX - rect.left,
+      y: touch.clientY - rect.top,
+    };
+  }
+
+  private handleTouchMove(e: TouchEvent): void {
+    e.preventDefault();
+    const touch = e.touches[0];
+    const deltaX = this.touchStartX - touch.clientX;
+    const maxScroll = this.config.coachWidth - this.config.canvasWidth;
+    this.state.scrollOffset = Math.max(0, Math.min(maxScroll,
+      this.touchStartScrollOffset + deltaX
+    ));
+  }
+
+  private handleTouchEnd(e: TouchEvent): void {
+    e.preventDefault();
+    if (!this.lastTouchPos) return;
+
+    const rect = this.canvas.getBoundingClientRect();
+    const x = this.lastTouchPos.x + this.state.scrollOffset;
+    const y = this.lastTouchPos.y;
+
+    this.handleClickAt(x, y, this.lastTouchPos.x, this.lastTouchPos.y);
+    this.lastTouchPos = null;
+  }
+
+  private handleResize(): void {
+    const container = document.getElementById('gameContainer');
+    if (!container) return;
+
+    const maxWidth = Math.min(1200, window.innerWidth);
+    const maxHeight = Math.min(600, window.innerHeight);
+
+    this.canvas.style.width = maxWidth + 'px';
+    this.canvas.style.height = maxHeight + 'px';
   }
 
   private handleClick(e: MouseEvent): void {
-    if (this.state.gameOver || !this.state.isPlacementPhase) return;
+    if (this.state.gameOver) return;
 
     const rect = this.canvas.getBoundingClientRect();
     const x = e.clientX - rect.left + this.state.scrollOffset;
     const y = e.clientY - rect.top;
 
-    // Check if clicking on queue
-    if (e.clientX - rect.left < 100 && e.clientY - rect.top > 80) {
-      const queueIndex = Math.floor((e.clientY - rect.top - 100) / 50);
+    this.handleClickAt(x, y, e.clientX - rect.left, e.clientY - rect.top);
+  }
+
+  private handleClickAt(worldX: number, worldY: number, screenX: number, screenY: number): void {
+    if (this.state.gameOver) return;
+
+    // Check if clicking on queue during placement phase
+    if (this.state.isPlacementPhase && screenX < 100 && screenY > 80) {
+      const queueIndex = Math.floor((screenY - 100) / 50);
       if (queueIndex >= 0 && queueIndex < this.state.queue.length) {
         this.state.currentSelectedPassenger = this.state.queue[queueIndex];
+        this.state.viewingPassenger = this.state.currentSelectedPassenger;
         this.updatePassengerProfile(this.state.currentSelectedPassenger);
         return;
       }
     }
 
-    // Place passenger if one is selected
-    if (this.state.currentSelectedPassenger) {
-      this.placePassenger({ x, y });
+    // Check if clicking on existing passenger (view profile)
+    for (const passenger of this.state.passengers) {
+      const distance = Math.hypot(
+        passenger.position.x - worldX,
+        passenger.position.y - worldY
+      );
+      if (distance < 30) {
+        this.state.viewingPassenger = passenger;
+        this.updatePassengerProfile(passenger);
+        return;
+      }
+    }
+
+    // Place passenger if one is selected during placement phase
+    if (this.state.isPlacementPhase && this.state.currentSelectedPassenger) {
+      this.placePassenger({ x: worldX, y: worldY });
     }
   }
 
@@ -202,11 +289,16 @@ export class Game {
       bubbleSize: template.bubbleSize,
       isSeated: false,
       lastInteractionTime: 0,
+      isExiting: false,
+      exitProgress: 0,
     };
   }
 
   update(deltaTime: number): void {
     if (this.state.gameOver) return;
+
+    // Update exit animations
+    this.updateExitAnimations(deltaTime);
 
     if (this.state.isPlacementPhase) {
       // Placement phase
@@ -219,14 +311,15 @@ export class Game {
       // Simulation phase
       this.state.roundTimer -= deltaTime;
 
-      // Update social simulation
+      // Update social simulation (only for non-exiting passengers)
+      const activePassengers = this.state.passengers.filter(p => !p.isExiting);
       this.state.totalStress = this.simulation.updatePassengers(
-        this.state.passengers,
+        activePassengers,
         deltaTime
       );
 
       // Check game over
-      if (this.simulation.checkGameOver(this.state.passengers)) {
+      if (this.simulation.checkGameOver(activePassengers)) {
         this.gameOver();
       }
 
@@ -236,6 +329,31 @@ export class Game {
     }
 
     this.updateUI();
+  }
+
+  private updateExitAnimations(deltaTime: number): void {
+    // Update exit progress for passengers who are leaving
+    for (const passenger of this.state.passengers) {
+      if (passenger.isExiting) {
+        passenger.exitProgress += deltaTime * 2; // 0.5 second animation
+      }
+    }
+
+    // Remove passengers who have finished exiting
+    this.state.passengers = this.state.passengers.filter(p => {
+      if (p.isExiting && p.exitProgress >= 1) {
+        if (p.isSeated) {
+          this.coach.freeSeat(p.id);
+        }
+        // Clear viewing if this passenger was being viewed
+        if (this.state.viewingPassenger?.id === p.id) {
+          this.state.viewingPassenger = null;
+          this.hidePassengerProfile();
+        }
+        return false;
+      }
+      return true;
+    });
   }
 
   private endPlacementPhase(): void {
@@ -259,15 +377,19 @@ export class Game {
   private nextStation(): void {
     this.state.stationNumber++;
 
-    // Remove some random passengers (they exit)
-    const exitCount = Math.floor(Math.random() * 3) + 1;
-    for (let i = 0; i < exitCount && this.state.passengers.length > 0; i++) {
-      const exitIndex = Math.floor(Math.random() * this.state.passengers.length);
-      const passenger = this.state.passengers[exitIndex];
-      if (passenger.isSeated) {
-        this.coach.freeSeat(passenger.id);
-      }
-      this.state.passengers.splice(exitIndex, 1);
+    // Mark some random passengers to exit with animation
+    const activePassengers = this.state.passengers.filter(p => !p.isExiting);
+    const exitCount = Math.min(
+      Math.floor(Math.random() * 3) + 1,
+      activePassengers.length
+    );
+
+    for (let i = 0; i < exitCount; i++) {
+      const exitIndex = Math.floor(Math.random() * activePassengers.length);
+      const passenger = activePassengers[exitIndex];
+      passenger.isExiting = true;
+      passenger.exitProgress = 0;
+      activePassengers.splice(exitIndex, 1); // Remove from active list
     }
 
     this.startStation();
@@ -300,7 +422,7 @@ export class Game {
     const profileEl = document.getElementById('passengerProfile');
     const typeEl = document.getElementById('passengerType');
     const traitsEl = document.getElementById('passengerTraits');
-    const portraitEl = document.getElementById('portrait');
+    const portraitEl = document.getElementById('portrait') as HTMLDivElement | null;
 
     if (!profileEl || !typeEl || !traitsEl || !portraitEl) return;
 
@@ -309,12 +431,16 @@ export class Game {
     profileEl.style.display = 'block';
     typeEl.textContent = template.name;
 
-    // Simple portrait representation
-    portraitEl.style.backgroundColor = template.color;
-    portraitEl.innerHTML = `<div style="width: 60px; height: 60px; background: ${template.color}; border: 2px solid #fff;"></div>`;
+    // Use renderer to draw passenger portrait
+    this.renderer.drawPassengerPortrait(passenger, portraitEl);
 
-    // Show traits
+    // Show traits with current status
+    const moodStatus = passenger.mood > 60 ? '😊' : passenger.mood > 30 ? '😐' : '😟';
+    const stressStatus = passenger.stress > 70 ? '🔴' : passenger.stress > 40 ? '🟡' : '🟢';
+
     traitsEl.innerHTML = `
+      <div class="trait">Mood: ${Math.floor(passenger.mood)} ${moodStatus}</div>
+      <div class="trait">Stress: ${Math.floor(passenger.stress)} ${stressStatus}</div>
       <div class="trait">Noise: ${template.noiseLevel}/3</div>
       <div class="trait">Smell: ${template.smellLevel}/3</div>
       <div class="trait ${template.socialEnergy > 0 ? 'positive' : 'negative'}">
@@ -328,6 +454,7 @@ export class Game {
   private hidePassengerProfile(): void {
     const profileEl = document.getElementById('passengerProfile');
     if (profileEl) profileEl.style.display = 'none';
+    this.state.viewingPassenger = null;
   }
 
   render(): void {

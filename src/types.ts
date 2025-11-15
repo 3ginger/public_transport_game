@@ -23,6 +23,8 @@ export interface PassengerState {
   bubbleSize: number; // personal space radius
   isSeated: boolean;
   lastInteractionTime: number;
+  isExiting: boolean;
+  exitProgress: number; // 0-1 for animation
 }
 
 export enum PassengerType {
@@ -76,6 +78,7 @@ export interface GameState {
   isPlacementPhase: boolean;
   roundTimer: number;
   currentSelectedPassenger: PassengerState | null;
+  viewingPassenger: PassengerState | null;
   gameOver: boolean;
   scrollOffset: number;
 }
