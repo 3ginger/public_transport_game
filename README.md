@@ -1,5 +1,7 @@
 # Train Social Tetris
 
+🎮 **[PLAY NOW](https://3ginger.github.io/public_transport_game/)** 🎮
+
 A roguelike game about managing passengers in a train. Your goal is to survive as many stations as possible without letting the social dynamics explode!
 
 ## Game Concept
@@ -76,6 +78,9 @@ Every 2-3 seconds, passengers interact with nearby people:
 - Noisy passengers should be away from introverts
 
 ## How to Run
+
+### Play Online
+Just visit: **https://3ginger.github.io/public_transport_game/**
 
 ### Development
 ```bash
